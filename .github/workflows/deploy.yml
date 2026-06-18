@@ -1,0 +1,31 @@
+# Optional CI: build the single-file bundle and deploy it to Frends on a version tag.
+#
+# NOTE on network reach: the deploy Process should be PRIVATE and IP-restricted to
+# the CI network (see frends/deploy-process.spec.md). A GitHub-hosted runner cannot
+# reach a private Agent — use a self-hosted runner inside your network, or (less
+# preferred) publish the deploy endpoint and rely on the API key + IP allow-list.
+name: Deploy SPA to Frends
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest # swap for a self-hosted runner if the endpoint is private
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build and deploy
+        run: npm run deploy
+        env:
+          FRENDS_DEPLOY_URL: ${{ secrets.FRENDS_DEPLOY_URL }}
+          FRENDS_DEPLOY_KEY: ${{ secrets.FRENDS_DEPLOY_KEY }}

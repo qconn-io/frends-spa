@@ -1,0 +1,50 @@
+{
+  "name": "Deploy SPA Bundle API Policy",
+  "description": "Protects the Deploy SPA Bundle endpoint with a Frends API Management key.",
+  "tags": [
+    "frends-spa",
+    "deploy"
+  ],
+  "allowPublicAccess": false,
+  "apiKeyName": "x-api-key",
+  "apiKeyLocation": "Header",
+  "targetEndpoints": [
+    {
+      "path": "/spa-deploy",
+      "method": "Post"
+    }
+  ],
+  "apiKeyGroups": [
+    {
+      "name": "Deploy SPA Bundle CI keys",
+      "apiPolicyApiKeyGroupAssignments": [
+        {
+          "apiKey": {
+            "id": 6
+          }
+        }
+      ]
+    }
+  ],
+  "identities": [],
+  "publicAccessDeployments": [],
+  "requestLoggingOptions": [
+    {
+      "name": "Deploy SPA Bundle request logging",
+      "loggingFields": [
+        "Method",
+        "Path",
+        "StatusCode"
+      ],
+      "ipLogging": "ClientIP",
+      "requestBodyMaxLengthKb": 16,
+      "responseBodyMaxLengthKb": 16,
+      "disableLogging": false,
+      "deployments": [
+        {
+          "agentGroupName": "Default"
+        }
+      ]
+    }
+  ]
+}

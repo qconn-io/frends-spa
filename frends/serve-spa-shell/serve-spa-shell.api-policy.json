@@ -1,0 +1,43 @@
+{
+  "name": "Serve SPA Shell API Policy",
+  "description": "Exposes the Serve SPA Shell endpoint publicly. It serves the browser-facing SPA shell, so no API key is required.",
+  "tags": [
+    "frends-spa",
+    "serve"
+  ],
+  "allowPublicAccess": true,
+  "apiKeyName": null,
+  "apiKeyLocation": null,
+  "targetEndpoints": [
+    {
+      "path": "/ui",
+      "method": "Get"
+    }
+  ],
+  "apiKeyGroups": [],
+  "identities": [],
+  "publicAccessDeployments": [
+    {
+      "agentGroupName": "Default"
+    }
+  ],
+  "requestLoggingOptions": [
+    {
+      "name": "Serve SPA Shell request logging",
+      "loggingFields": [
+        "Method",
+        "Path",
+        "StatusCode"
+      ],
+      "ipLogging": "ClientIP",
+      "requestBodyMaxLengthKb": 1,
+      "responseBodyMaxLengthKb": 16,
+      "disableLogging": false,
+      "deployments": [
+        {
+          "agentGroupName": "Default"
+        }
+      ]
+    }
+  ]
+}
