@@ -87,16 +87,29 @@ anyone who opens the page — View Source and DevTools expose it. So:
 
 ## Deploying
 
+Hosting is **slug-addressed**: a tenant hosts many UIs on the shared infrastructure, each
+addressed by a required **slug** (e.g. `intake-form`, `approvals`) and isolated under its
+own serving subdirectory and pointer. This repo is one UI, so it targets one slug.
+
 `npm run deploy` builds, validates (single-file + size + `id="app"` marker), base64-encodes
-the bundle, and POSTs it to the Frends "Deploy SPA Bundle" Process. It reads from `.env`
-(gitignored — copy [.env.example](.env.example)):
+the bundle, and POSTs it to the Frends "Deploy SPA Bundle" Process as
+`POST /api/spa-deploy?slug=<slug>`. It reads from `.env` (gitignored — copy
+[.env.example](.env.example)):
 
 - `FRENDS_DEPLOY_URL` — the deploy Process endpoint.
 - `FRENDS_DEPLOY_KEY` — the API Management key (sent as `x-api-key`; 401/403 if wrong).
+- `FRENDS_DEPLOY_SLUG` — **required**; the slug this repo deploys to. Must match
+  `^[a-z0-9-]+$`. Override per-run with `--slug <slug>`. A missing or invalid slug fails
+  fast locally (and the Process rejects it with `400 { "error": "invalid slug" }`).
 
-On success it prints the installed version (`index.<utc-timestamp>.html`); the Process
-writes that versioned file and flips the `current.txt` pointer last. The live UI is served
-at `FRENDS_SERVE_URL` (public GET) — smoke-test there after deploying.
+On success it prints the installed version (`index.<utc-timestamp>.html`) for that slug; the
+Process writes that versioned file into the slug's subdirectory and flips that slug's
+`current.txt` pointer last. The live UI is served at `GET /api/ui/<slug>` (public GET) —
+`FRENDS_SERVE_URL` points at the `ui/{slug}` route; smoke-test the deployed slug there.
+There is **no bare `GET /api/ui`** — the slug is a required path segment.
+
+The slug charset and wire contract are frozen in [frends/README.md](frends/README.md)
+(Interface Contract) and pinned identically in the deploy CLI and both Processes.
 
 ## Do not
 
