@@ -62,15 +62,12 @@ npm run dev                   # Serves http://localhost:5173 (proxies /api to Ag
    - `spa.ServingPath` (String): The **parent** directory on the Agent holding one subdirectory per slug — bundles live under `{spa.ServingPath}/{slug}/` (Development default: `/frends-data/spa`).
    - `spa.CurrentPointer` (String): Per-slug pointer filename (default: `current.txt`).
    - `spa.MaxBundleBytes` (Number): Max decoded bundle size (default: `5242880`).
-   - There is **no `spa.DefaultSlug`** — there is no default slug; the slug is always supplied explicitly.
 
 3. **Import Infrastructure Processes** (from [frends/](frends/)):
    - **Deploy**: Import [process.json](frends/deploy-spa-bundle/process.json). Verify the HTTP Trigger route is `POST /spa-deploy`.
    - **Serve**: Import [process.json](frends/serve-spa-shell/process.json). Verify the HTTP Trigger route is `GET /ui/{slug}` and is publicly reachable.
 
 4. **Deploy Processes**: Enable triggers and deploy both processes to your Agent Group.
-
-> **Source of truth:** the wire contract (routes, slug charset, serving layout, env vars) is frozen in [frends/README.md](frends/README.md) — the Interface Contract. This README mirrors it; where they could drift, the contract wins. Note that the bare `GET /ui` route no longer exists — the slug is a required path segment (a breaking change from the earlier single-UI layout). These are simple Frends HTTP Trigger routes; do not add an `/api` prefix to deploy or serve URLs.
 
 ### 3. Configure Environment Variables (`.env`)
 
