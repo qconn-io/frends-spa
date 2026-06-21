@@ -4,8 +4,8 @@
 
 The `Serve SPA Shell` Process SHALL expose a public HTTP `GET` endpoint that serves the
 active bundle for a UI identified by a slug in the path, at route template `ui/{slug}`. The
-slug segment is REQUIRED — there is no default slug and no bare `GET /ui` route. The
-endpoint MUST remain public (no API key) and keep CORS disabled.
+slug segment is REQUIRED; there is no default slug and no bare `GET /ui` route. The
+endpoint MUST remain public with no API key and keep CORS disabled.
 
 #### Scenario: Serve the active bundle for a slug
 
@@ -13,12 +13,6 @@ endpoint MUST remain public (no API key) and keep CORS disabled.
   `intake-form`
 - **THEN** the Process returns HTTP `200` with `Content-Type: text/html; charset=utf-8`,
   the bundle HTML as the body, an `ETag`, and `Cache-Control: no-cache`
-
-#### Scenario: Unknown slug has no active bundle
-
-- **WHEN** a browser issues `GET /api/ui/{slug}` for a slug that has never been deployed
-- **THEN** the Process returns HTTP `503` maintenance HTML with `Retry-After: 10` and no
-  stack trace
 
 ### Requirement: Slug-scoped path resolution and isolation
 
@@ -40,10 +34,14 @@ path separators or `..`.
 - **THEN** the Process does not read any file outside the serving parent and returns an
   error response without serving a bundle
 
-### Requirement: Caching and maintenance behavior preserved per slug
+## MODIFIED Requirements
 
-For each slug the Process SHALL preserve `ETag`/`If-None-Match` `304` handling and the
-`503` maintenance fallback when the slug's pointer or bundle cannot be read.
+### Requirement: Caching and maintenance behavior
+
+For each slug the Process SHALL support `ETag`/`If-None-Match` `304` handling and SHALL
+return a `503` maintenance response when the slug's pointer or active bundle cannot be read
+after the configured retry. Maintenance responses MUST NOT expose stack traces or internal
+error details.
 
 #### Scenario: Client ETag matches the slug's active version
 
@@ -56,5 +54,23 @@ For each slug the Process SHALL preserve `ETag`/`If-None-Match` `304` handling a
 
 - **WHEN** the slug's pointer or active bundle file cannot be read after the configured
   retry
-- **THEN** the Process returns HTTP `503` maintenance HTML and does not expose a stack
-  trace
+- **THEN** the Process returns HTTP `503` maintenance HTML with `Retry-After: 10` and does
+  not expose a stack trace
+
+## REMOVED Requirements
+
+### Requirement: Public single-UI serving route
+
+**Reason**: The tenant needs to host multiple independently deployed UIs, and the bare
+`GET /ui` route can address only one active bundle.
+
+**Migration**: Serve each UI through `GET /ui/{slug}`. Existing UIs must be redeployed under
+a chosen slug; there is no default slug fallback.
+
+### Requirement: Flat serving-directory path resolution
+
+**Reason**: A root-level pointer and root-level versioned bundle files do not isolate UIs
+from each other.
+
+**Migration**: Resolve the active pointer and bundle under `{spa.ServingPath}/{slug}/` after
+validating the required slug.

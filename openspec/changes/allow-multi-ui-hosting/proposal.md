@@ -30,15 +30,15 @@ clobbering anyone else's.
 ## Capabilities
 
 ### New Capabilities
-- `spa-serving`: Public, slug-addressed serving of the active single-file bundle at `GET
-  /ui/{slug}` with a required slug segment, ETag/304 caching, and per-slug maintenance
-  fallback behavior.
-- `spa-deployment`: Slug-scoped deployment of a validated bundle — slug validation,
-  slug-scoped versioned write and atomic pointer flip in the Process, plus the local
-  deploy CLI's slug parameter and upload contract.
+<!-- None. The existing SPA hosting capabilities are changed from single-UI to slug-addressed. -->
 
 ### Modified Capabilities
-<!-- No pre-existing specs in openspec/specs/; all behavior here is captured as new capabilities. -->
+- `spa-serving`: The existing public single-UI serving route at `GET /ui` becomes
+  slug-addressed serving at `GET /ui/{slug}`, with slug validation, slug-scoped path
+  resolution, per-slug ETag/304 behavior, and the maintenance fallback preserved per slug.
+- `spa-deployment`: The existing protected bundle deployment flow gains a required slug
+  query parameter, slug validation, slug-scoped versioned writes, a per-slug atomic pointer
+  flip, and a deploy CLI slug parameter.
 
 ## Impact
 
@@ -49,7 +49,7 @@ clobbering anyone else's.
   subdirectory per slug, each with its own versioned bundles and `current.txt`.
 - **Deploy CLI:** `scripts/deploy.mjs` gains a slug argument and includes it in the upload
   to the deploy Process.
-- **Docs:** `CLAUDE.md`, `frends/README.md`, `.env.example`, and the two Process specs and
-  curl smoke tests describe the slug-addressed model.
+- **Docs:** `README.md`, `CLAUDE.md`, `frends/README.md`, `.env.example`, and the two
+  Process specs and curl smoke tests describe the slug-addressed model.
 - **Routing/auth:** unchanged trust model — serving stays public, deploy stays API
   Management protected; no CORS, all calls remain root-relative under `/api`.

@@ -22,8 +22,9 @@ frends/serve-spa-shell/. The frozen contract lives in design.md → Interface co
 
 ## 3. [A] Docs (apply, this repo)
 
-- [x] 3.1 Update `CLAUDE.md` (Deploying / Talking to APIs): slug-addressed hosting, the `/api/ui/{slug}` serve URL, `?slug=` on deploy, the required `FRENDS_DEPLOY_SLUG`, and that `GET /ui` no longer exists.
-- [x] 3.2 Verify `npm run build` passes clean (vue-tsc + single-file assertion) after the CLI change.
+- [x] 3.1 Update `README.md`: slug-addressed hosting, `GET /api/ui/{slug}`, `POST /api/spa-deploy?slug=<slug>`, per-slug serving layout, required `FRENDS_DEPLOY_SLUG`, and a pointer to the frozen Interface Contract in `frends/README.md`.
+- [x] 3.2 Update `CLAUDE.md` (Deploying / Talking to APIs): slug-addressed hosting, the `/api/ui/{slug}` serve URL, `?slug=` on deploy, the required `FRENDS_DEPLOY_SLUG`, and that `GET /ui` no longer exists.
+- [x] 3.3 Verify `npm run build` passes clean (vue-tsc + single-file assertion) after the CLI change.
 
 ## 4. [B] Deploy SPA Bundle Process (Frends agent — NOT apply)
 
@@ -44,8 +45,8 @@ frends/serve-spa-shell/. The frozen contract lives in design.md → Interface co
 
 ## 6. [B] Tenant rollout (tenant owner — NOT apply)
 
-- [ ] 6.1 Import the updated `Deploy SPA Bundle` and `Serve SPA Shell` `process.json` into the tenant; confirm `spa.ServingPath` (parent dir), `spa.CurrentPointer`, `spa.MaxBundleBytes` are set and `spa.DefaultSlug` is absent.
-- [ ] 6.2 Redeploy each existing UI under a chosen slug; delete orphaned root-level `index.<ts>.html` / `current.txt` under `spa.ServingPath` after verifying.
+- [x] 6.1 Import the updated `Deploy SPA Bundle` and `Serve SPA Shell` `process.json` into the tenant; confirm `spa.ServingPath` (parent dir), `spa.CurrentPointer`, `spa.MaxBundleBytes` are set and `spa.DefaultSlug` is absent.
+- [x] 6.2 Redeploy each existing UI under a chosen slug; delete orphaned root-level `index.<ts>.html` / `current.txt` under `spa.ServingPath` after verifying.
 
 ## 7. [C] End-to-end verification (this repo, after Processes are live)
 
