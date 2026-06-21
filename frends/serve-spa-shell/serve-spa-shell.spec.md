@@ -200,18 +200,17 @@ flowchart TD
 ## Test Plan
 
 After importing (`--conflict NewVersion`) and deploying to Development with active
-triggers, the API Management policy must expose `/ui/{slug}` publicly (update
-`serve-spa-shell.api-policy.json` `targetEndpoints` to `/ui/{slug}` and re-apply). Then,
-with `Deploy SPA Bundle` having run once for a slug `<S>`:
+triggers, the HTTP Trigger must expose `/ui/{slug}` publicly. Then, with
+`Deploy SPA Bundle` having run once for a slug `<S>`:
 
-1. `GET /api/ui/<S>` without `If-None-Match` → HTTP `200`, `text/html`, body is the
+1. `GET /ui/<S>` without `If-None-Match` → HTTP `200`, `text/html`, body is the
    bundle, `ETag` present, `Cache-Control: no-cache`.
-2. `GET /api/ui/<S>` with `If-None-Match` equal to the returned ETag → HTTP `304`, empty
+2. `GET /ui/<S>` with `If-None-Match` equal to the returned ETag → HTTP `304`, empty
    body, matching `ETag`.
-3. `GET /api/ui/<malformed>` (e.g. `Bad_Slug`, uppercase/underscore) → HTTP `404`, short
+3. `GET /ui/<malformed>` (e.g. `Bad_Slug`, uppercase/underscore) → HTTP `404`, short
    HTML, no file read, no stack trace.
-4. `GET /api/ui` (no slug segment) → gateway `404` (route does not exist).
-5. `GET /api/ui/<never-deployed>` (well-formed, no bundle) → maintenance fallback. The
+4. `GET /ui` (no slug segment) → gateway `404` (route does not exist).
+5. `GET /ui/<never-deployed>` (well-formed, no bundle) → maintenance fallback. The
    intended response is `503`; the pre-existing read-failure path currently returns a
    generic error.
 

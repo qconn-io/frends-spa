@@ -73,7 +73,7 @@ override, and slug-addressed serve URL.
 
 - **WHEN** a new operator reads `README.md` to set up deployment
 - **THEN** it documents `FRENDS_DEPLOY_SLUG` as required (charset `^[a-z0-9-]+$`, with the
-  `--slug` per-run override) and the slug-addressed serve URL `GET /api/ui/{slug}`,
+  `--slug` per-run override) and the slug-addressed serve URL `GET /ui/{slug}`,
   matching the frozen Interface Contract in `frends/README.md` with no drift
 
 ### Requirement: Slug validation

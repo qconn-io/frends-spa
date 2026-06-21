@@ -3,9 +3,9 @@
 This directory holds the build specs and exported definitions for the two Frends Processes
 that host SPA bundles for this scaffold:
 
-- **`serve-spa-shell/`** — `GET /api/ui/{slug}`, public. Serves the active single-file
+- **`serve-spa-shell/`** — `GET /ui/{slug}`, public. Serves the active single-file
   bundle for a UI addressed by `slug`.
-- **`deploy-spa-bundle/`** — `POST /api/spa-deploy?slug=<slug>`, API Management protected.
+- **`deploy-spa-bundle/`** — `POST /spa-deploy?slug=<slug>`.
   Receives a base64 bundle, validates it, writes a versioned file under the slug's
   subdirectory, and flips that slug's pointer last (atomic commit).
 
@@ -17,14 +17,15 @@ Deploying one slug never touches another.
 
 This is the wire contract between this repo's deploy CLI (`scripts/deploy.mjs`) and the two
 Processes. Both sides cite it; **neither side may change it unilaterally** — end-to-end
-verification meets here. The slug charset is pinned in three places (this file, the CLI, and
-both Processes) and must not diverge.
+verification meets here. The deploy and serve endpoints are Frends HTTP Trigger route
+templates exposed at the root path; Frends does not prepend `/api` to them. The slug charset
+is pinned in three places (this file, the CLI, and both Processes) and must not diverge.
 
 | Concern | Value |
 |---|---|
 | Slug charset | `^[a-z0-9-]+$` — lowercase alphanumeric and hyphen, no separators, no `..`. Required, validated on both sides. |
-| Serve route | `GET /api/ui/{slug}` — slug is a **required** route segment. There is no bare `GET /api/ui`. |
-| Deploy route | `POST /api/spa-deploy?slug=<slug>` — slug is a **required** query parameter. |
+| Serve route | `GET /ui/{slug}` — slug is a **required** route segment. There is no bare `GET /ui`. |
+| Deploy route | `POST /spa-deploy?slug=<slug>` — slug is a **required** query parameter. |
 | Deploy body | `Content-Type: text/plain`, base64 of the UTF-8 bundle. (Unchanged.) |
 | Deploy success | `200 { "version": "index.<utc-timestamp>.html" }`. (Unchanged.) |
 | Deploy slug error | `400 { "error": "invalid slug" }` (missing or invalid slug), no file writes. |
@@ -51,20 +52,20 @@ Notes for the Frends agent who owns the Process mechanics:
    directory** — bundles live one level deeper, under a per-slug subdirectory. Confirm
    `spa.CurrentPointer` and `spa.MaxBundleBytes` are set and that **no `spa.DefaultSlug`
    exists**.
-3. Apply each Process's API Management policy (`*.api-policy.json`): deploy stays protected
-   (`x-api-key`), serve stays public. No CORS on either.
+3. Verify each HTTP Trigger is exposed at the route template above. Do not add an `/api`
+   prefix to either deploy or serve. No CORS on either.
 4. Smoke-test with each Process's `curl-smoke-test.sh`.
 
 ## Migrating from the single-UI layout (breaking change)
 
-The previous `GET /api/ui` route and the root-level `index.<ts>.html` / `current.txt` under
+The previous `GET /ui` route and the root-level `index.<ts>.html` / `current.txt` under
 `spa.ServingPath` are gone. To migrate:
 
 1. Import the updated Processes and set the env vars (above).
 2. Redeploy each existing UI under a chosen slug (`npm run deploy` with `FRENDS_DEPLOY_SLUG`
-   set), then smoke-test `GET /api/ui/{slug}`.
+   set), then smoke-test `GET /ui/{slug}`.
 3. Verify, then delete the orphaned root-level `index.<ts>.html` and `current.txt` directly
    under `spa.ServingPath`.
 
 Rollback: re-import the prior Process versions; the old root files still serve the previous
-single UI at `/api/ui`.
+single UI at `/ui`.

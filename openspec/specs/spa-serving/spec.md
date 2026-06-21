@@ -39,7 +39,7 @@ endpoint MUST remain public with no API key and keep CORS disabled.
 
 #### Scenario: Serve the active bundle for a slug
 
-- **WHEN** a browser issues `GET /api/ui/intake-form` and a bundle is active for
+- **WHEN** a browser issues `GET /ui/intake-form` and a bundle is active for
   `intake-form`
 - **THEN** the Process returns HTTP `200` with `Content-Type: text/html; charset=utf-8`,
   the bundle HTML as the body, an `ETag`, and `Cache-Control: no-cache`
