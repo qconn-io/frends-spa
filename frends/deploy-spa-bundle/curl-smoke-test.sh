@@ -3,6 +3,9 @@ set -euo pipefail
 
 ENDPOINT="${ENDPOINT:-https://maxsolutions-dev-agent.frendsapp.com/spa-deploy}"
 API_KEY_FILE="${API_KEY_FILE:-/tmp/frends-spa-apim-key.json}"
+# Slug is the required ?slug= query parameter (^[a-z0-9-]+$). Override with SLUG=...
+SLUG="${SLUG:-smoke-test}"
+INVALID_SLUG="${INVALID_SLUG:-../escape}"
 HTML_FILE="${1:-}"
 
 require_cmd() {
@@ -79,28 +82,48 @@ fi
 
 invalid_body="$(printf '<!doctype html><html><body><main></main></body></html>' | b64)"
 
+# Percent-encode the invalid slug's path separators so it survives the query string.
+encoded_invalid_slug="${INVALID_SLUG//\//%2F}"
+
 echo "Endpoint: $ENDPOINT"
+echo "Slug:     $SLUG"
 echo
 
 run_case "missing-key" \
-  -X POST "$ENDPOINT" \
+  -X POST "$ENDPOINT?slug=$SLUG" \
   -H 'Content-Type: text/plain' \
   --data "$valid_body"
 
 run_case "wrong-key" \
-  -X POST "$ENDPOINT" \
+  -X POST "$ENDPOINT?slug=$SLUG" \
   -H 'Content-Type: text/plain' \
   -H 'x-api-key: wrong-key' \
   --data "$valid_body"
 
-run_case "invalid-bundle" \
+# No ?slug= at all → 400 {"error":"invalid slug"}, no writes.
+run_case "missing-slug" \
   -X POST "$ENDPOINT" \
+  -H 'Content-Type: text/plain' \
+  -H "x-api-key: $api_key" \
+  --data "$valid_body"
+
+# Out-of-charset / path-separator slug → 400 {"error":"invalid slug"}, no writes.
+run_case "invalid-slug" \
+  -X POST "$ENDPOINT?slug=$encoded_invalid_slug" \
+  -H 'Content-Type: text/plain' \
+  -H "x-api-key: $api_key" \
+  --data "$valid_body"
+
+# Valid slug, invalid bundle → 400 {"error":"invalid bundle"}, no writes.
+run_case "invalid-bundle" \
+  -X POST "$ENDPOINT?slug=$SLUG" \
   -H 'Content-Type: text/plain' \
   -H "x-api-key: $api_key" \
   --data "$invalid_body"
 
+# Valid slug, valid bundle → 200 {"version":"index.<ts>.html"} under $SLUG's subdirectory.
 run_case "valid-bundle" \
-  -X POST "$ENDPOINT" \
+  -X POST "$ENDPOINT?slug=$SLUG" \
   -H 'Content-Type: text/plain' \
   -H "x-api-key: $api_key" \
   --data "$valid_body"

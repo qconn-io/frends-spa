@@ -10,7 +10,7 @@
   "apiKeyLocation": null,
   "targetEndpoints": [
     {
-      "path": "/ui",
+      "path": "/ui/{slug}",
       "method": "Get"
     }
   ],
